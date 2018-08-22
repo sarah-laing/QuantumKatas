@@ -16,29 +16,36 @@
         }
     }
 
-    operation BellTest (count: Int, initial: Result) : (Int,Int)
+    operation BellTest (count: Int, initial: Result) : (Int,Int,Int)
     {
       body
       {
         mutable numOnes = 0;
-        using (qubits = Qubit[1])
+        mutable agree = 0;
+        using (qubits = Qubit[2])
         {
           for (test in 1..count)
           {
             Set(initial, qubits[0]);
-
+            Set(Zero, qubits[1]);
+            H(qubits[0]);
+            CNOT(qubits[0],qubits[1]);
             let res =M(qubits[0]);
 
-            // Count the ones
+            if( M(qubits[1]) == res)
+            {
+              set agree = agree + 1;
+            }
             if (res == One)
             {
               set numOnes = numOnes + 1;
             }
           }
           Set(Zero, qubits[0]);
+          Set(Zero, qubits[1]);
         }
         // return numbers of times |0> and |1> were seen
-        return (count - numOnes, numOnes);
+        return (count - numOnes, numOnes, agree);
       }
     }
 }
